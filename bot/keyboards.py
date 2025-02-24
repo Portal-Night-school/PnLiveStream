@@ -3,10 +3,11 @@ from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButt
 start_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="DeepSeek"), KeyboardButton(text="Gemini"), KeyboardButton(text="Kandinsky")
+            KeyboardButton(text="🐳 DeepSeek"), KeyboardButton(text="✨ Gemini"), KeyboardButton(text="🖼️ Kandinsky")
         ]
     ],
-    resize_keyboard=True
+    resize_keyboard=True,
+    input_field_placeholder="Нажимая на соответствующую кнопку, ты сразу попадаешь в чат с нейросетью и можешь начинать с ней работы"
 )
 
 stop_context = InlineKeyboardMarkup(
@@ -17,3 +18,5 @@ stop_context = InlineKeyboardMarkup(
     ]
 )
 
+
+rmk = ReplyKeyboardRemove()

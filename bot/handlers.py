@@ -1,6 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, FSInputFile
-from keyboards import stop_context, start_keyboard
+from keyboards import stop_context, start_keyboard, rmk
 from collections import defaultdict
 from google.generativeai import configure, GenerativeModel
 from dotenv import load_dotenv
@@ -66,21 +66,21 @@ async def get_gemini_response(user_id):
         return f"Ошибка при генерации ответа: {e}"
 
 
-@rt.message(F.text == "DeepSeek")
+@rt.message(F.text == "🐳 DeepSeek")
 async def start_deepseek(msg: Message):
     user_session[msg.from_user.id] = 'deepseek'
     await msg.answer("Задайте вопрос для DeepSeek", reply_markup=stop_context)
 
 
-@rt.message(F.text == 'Gemini')
+@rt.message(F.text == '✨ Gemini')
 async def start_gemini(msg: Message):
     user_session[msg.from_user.id] = "gemini"
     await msg.answer("Задайте вопрос для Gemini", reply_markup=stop_context)
     
 
-@rt.message(F.text == 'Kandinsky')
+@rt.message(F.text == '🖼️ Kandinsky')
 async def start_kandinsky(msg: Message, state: FSMContext):
-    await msg.answer("Напишите описание картинки")
+    await msg.answer("Напишите описание картинки", reply_markup=rmk)
     await state.set_state(chatKandin.kandinski_chat)
     
     
@@ -107,7 +107,7 @@ async def send_picture(msg: Message, state: FSMContext):
                     caption
                 )
             )
-            await msg.answer_photo(photo=file, caption=formatted_response)
+            await msg.answer_photo(photo=file, caption=formatted_response, reply_markup=start_keyboard)
             os.remove(dir)
         else:
             await msg.answer("Что-то пошло не так, пробую еще раз")
@@ -128,7 +128,7 @@ async def handle_neuro(msg: Message):
     if model is None:
         await msg.answer("Выберите, пожалуйста, одну из предложенных моделей")
         return
-    
+    await msg.answer("Нейросеть обрабатывает запрос\. Ожидаем ответ\.\.\. ⏰", reply_markup=rmk)
     
     user_context[user_id].append({"role": "user", "content": msg.text})
     if model == 'deepseek':
