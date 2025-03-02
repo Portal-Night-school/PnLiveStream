@@ -14,7 +14,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.chat_action import ChatActionSender
 from main import bot
-
+from aiogram.enums import ParseMode
 
 load_dotenv()
 
@@ -35,10 +35,6 @@ model_gemini = GenerativeModel("gemini-pro")
 
 user_session = defaultdict(lambda: None)
 user_context = defaultdict(list)
-
-def ekranirovaniye(text: str) -> str:
-    pattern = r"([_*\[\]()~`>#+-=|{}.!\\])"
-    return re.sub(pattern, r"\\\1", text)
 
 
 async def get_deepseek_response(user_id):
@@ -122,27 +118,39 @@ async def clear_context(call: CallbackQuery):
     
 @rt.message()
 async def handle_neuro(msg: Message):
-    user_id = msg.from_user.id
+    user_id = msg.from_user.id 
     model = user_session[user_id]
     
     if model is None:
-        await msg.answer("Выберите, пожалуйста, одну из предложенных моделей")
+        await msg.answer(
+            "Выберите, пожалуйста, одну из предложенных моделей",
+            parse_mode=ParseMode.MARKDOWN
+        )
         return
-    await msg.answer("Нейросеть обрабатывает запрос\. Ожидаем ответ\.\.\. ⏰", reply_markup=rmk)
+    
+    await msg.answer(
+        "Нейросеть обрабатывает запрос... ⏰",
+        reply_markup=rmk,
+        parse_mode=ParseMode.MARKDOWN
+    )
     
     user_context[user_id].append({"role": "user", "content": msg.text})
+    
     if model == 'deepseek':
         response = await get_deepseek_response(user_id)
     elif model == "gemini":
         response = await get_gemini_response(user_id)
     else:
         response = "Выберите модель"
+    
     user_context[user_id].append({"role": "assistant", "content": response})
-    
-    formatted_response = markdown.text(
-        markdown.markdown_decoration.quote(
-            response
-        )
+    print(response)
+
+    # Здесь добавляем только минимальную очистку от запрещённых символов
+    formatted_response = response
+
+    await msg.answer(
+        formatted_response,
+        reply_markup=stop_context,
+        parse_mode=ParseMode.MARKDOWN
     )
-    
-    await msg.answer(formatted_response, reply_markup=stop_context)
