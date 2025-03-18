@@ -97,13 +97,13 @@ async def send_picture(msg: Message, state: FSMContext):
                 file.write(image_data)
             
             file = FSInputFile(dir)
-            caption = f"Изображение по запросу: {msg.text} сгенерировано!"
+            caption = f"Изображение по запросу: {msg.text} сгенерировано!\n\nМожете продолжать генерацию изображений"
             formatted_response = markdown.text(
                 markdown.markdown_decoration.quote(
                     caption
                 )
             )
-            await msg.answer_photo(photo=file, caption=formatted_response, reply_markup=start_keyboard)
+            await msg.answer_photo(photo=file, caption=formatted_response, reply_markup=stop_context)
             os.remove(dir)
         else:
             await msg.answer("Что-то пошло не так, пробую еще раз")
@@ -114,6 +114,12 @@ async def send_picture(msg: Message, state: FSMContext):
 async def clear_context(call: CallbackQuery):
     user_session[call.message.from_user.id] = None
     await call.message.answer("Вы закончили диалог", reply_markup=start_keyboard)
+    
+
+@rt.callback_query(F.data == "stop_generation")
+async def stop_generation_images(call: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await call.message.answer("Вы в главном меню", reply_markup=start_keyboard)
     
     
 @rt.message()

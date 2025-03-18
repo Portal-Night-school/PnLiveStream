@@ -18,5 +18,12 @@ stop_context = InlineKeyboardMarkup(
     ]
 )
 
+stop_kandinsky = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Завершить генерацию", callback_data="stop_generation")
+        ]
+    ]
+)
 
 rmk = ReplyKeyboardRemove()
