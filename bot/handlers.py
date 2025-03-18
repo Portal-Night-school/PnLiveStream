@@ -31,7 +31,7 @@ client_deepseek = OpenAI(api_key=DEEPSEEK_API_KEy, base_url="https://api.deepsee
 
 
 configure(api_key=GEMINI_API_KEY)
-model_gemini = GenerativeModel("gemini-pro")
+model_gemini = GenerativeModel("models/gemini-1.5-flash")
 
 user_session = defaultdict(lambda: None)
 user_context = defaultdict(list)
