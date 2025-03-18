@@ -72,12 +72,16 @@ async def start_deepseek(msg: Message):
 async def start_gemini(msg: Message):
     user_session[msg.from_user.id] = "gemini"
     await msg.answer("Задайте вопрос для Gemini", reply_markup=stop_context)
-    
-
+  
+# временно
 @rt.message(F.text == '🖼️ Kandinsky')
 async def start_kandinsky(msg: Message, state: FSMContext):
-    await msg.answer("Напишите описание картинки", reply_markup=rmk)
-    await state.set_state(chatKandin.kandinski_chat)
+    await msg.answer("Временно генерация изображений отключена")
+
+# @rt.message(F.text == '🖼️ Kandinsky')
+# async def start_kandinsky(msg: Message, state: FSMContext):
+#     await msg.answer("Напишите описание картинки", reply_markup=rmk)
+#     await state.set_state(chatKandin.kandinski_chat)
     
     
 @rt.message(chatKandin.kandinski_chat)
