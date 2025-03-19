@@ -72,22 +72,25 @@ async def start_deepseek(msg: Message):
 async def start_gemini(msg: Message):
     user_session[msg.from_user.id] = "gemini"
     await msg.answer("Задайте вопрос для Gemini", reply_markup=stop_context)
-  
+    
 # временно
 @rt.message(F.text == '🖼️ Kandinsky')
 async def start_kandinsky(msg: Message, state: FSMContext):
     await msg.answer("Временно генерация изображений отключена")
-
-# @rt.message(F.text == '🖼️ Kandinsky')
-# async def start_kandinsky(msg: Message, state: FSMContext):
-#     await msg.answer("Напишите описание картинки", reply_markup=rmk)
-#     await state.set_state(chatKandin.kandinski_chat)
     
+'''
+@rt.message(F.text == '🖼️ Kandinsky')
+async def start_kandinsky(msg: Message, state: FSMContext):
+    global descr 
+    descr = await msg.answer("Напишите описание картинки", reply_markup=rmk)
+    await state.set_state(chatKandin.kandinski_chat)
+''' 
     
 @rt.message(chatKandin.kandinski_chat)
 async def send_picture(msg: Message, state: FSMContext):
+    # await descr.delete()
     async with ChatActionSender(bot=bot, chat_id=msg.from_user.id, action="upload_video"):
-        await msg.answer("Генерация изображения занимает от 30 сек\.\.\.")
+        processing_message = await msg.answer("Генерация изображения занимает от 30 сек\.\.\.")
         prompt = msg.text
         api = Kandinsky()
         uuid = api.generate(prompt)
@@ -101,13 +104,15 @@ async def send_picture(msg: Message, state: FSMContext):
                 file.write(image_data)
             
             file = FSInputFile(dir)
-            caption = f"Изображение по запросу: {msg.text} сгенерировано!\n\nМожете продолжать генерацию изображений"
+            caption = f"Изображение по запросу:\n{msg.text}\nсгенерировано!\n\nМожете продолжать генерацию изображений"
             formatted_response = markdown.text(
                 markdown.markdown_decoration.quote(
                     caption
                 )
             )
-            await msg.answer_photo(photo=file, caption=formatted_response, reply_markup=stop_context)
+            await msg.delete()
+            await processing_message.delete()
+            await msg.answer_photo(photo=file, caption=formatted_response, reply_markup=stop_context, parse_mode=ParseMode.MARKDOWN)
             os.remove(dir)
         else:
             await msg.answer("Что-то пошло не так, пробую еще раз")
@@ -138,7 +143,7 @@ async def handle_neuro(msg: Message):
         )
         return
     
-    await msg.answer(
+    processing_message = await msg.answer(
         "Нейросеть обрабатывает запрос... ⏰",
         reply_markup=rmk,
         parse_mode=ParseMode.MARKDOWN
@@ -158,7 +163,7 @@ async def handle_neuro(msg: Message):
 
     # Здесь добавляем только минимальную очистку от запрещённых символов
     formatted_response = response
-
+    await processing_message.delete()
     await msg.answer(
         formatted_response,
         reply_markup=stop_context,
